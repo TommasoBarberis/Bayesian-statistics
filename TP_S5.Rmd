@@ -1,0 +1,109 @@
+---
+title: "Introduction to JAGS : birth weight"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Context
+
+We wish to compare the birth weight between boys and girls. To do this, we know the birth weight for a set of 48 children (file pnais48.txt). Column POIDNAIS represents birth weight, and column SEXE represents sex (0 : boy, 1 : girl). Variables are renamed as weight and sex. Moreover, for ease of use, the sex variable is re-encoded by addding 1 at each child (hence, the value 1 correspond to a boy, and 2 to a girl).
+
+Hypothese: variabilité de poids est le meme chez les filles et les garcons.
+
+```{r}
+data_weight <- read.table("pnais48.txt", h = T, sep = ",")
+sex <- data_weight$SEX + 1
+weight <- data_weight$POIDNAIS
+table(sex)
+```
+
+The study is on 29 boys and 19 girls.
+
+The weight of children is supposed to follow a normal distribution, with different means between the two sexes (µb and µg), but a shared standard deviation (σ). We set two priors: a uniform distribution between 2,500 and 5,000 grams for the mean weight for boys and girls and a uniform distribution between 200 and 800 grams for the standard deviation of the weight.
+
+# 2. Model formalization
+
+* Set up the DAG associated to the model, specifying stochastic and deterministic links.
+(mettre schema)
+
+# 3. Implementation of the model
+
+## Model
+```{r}
+library(rjags)
+
+model1 <-
+  "
+  model {
+  
+  # Definition des liens
+  
+  for (i in 1:Nchild)
+{
+    mu[i] <- mean[sex[i]]   # mean: vecteur de 2 elements, la moyenne pour les garcons et la                             moyenne pour les filles
+    w[i] ~ dnorm(mu[i], tau) # poids
+}
+
+  # Definition des distributions a priori  
+  mean[1] ~ dunif(2500, 5000) # supposition de l'a priori
+  mean[2] ~ dunif(2500, 5000)
+  tau <- 1/sd # precision
+  sd ~ dunif(200, 800)
+  }
+  "
+```
+
+**~**: lien stochastique 
+
+**<-**: lien detereministe 
+
+## Data
+
+* Define the data required for this model (data).
+Beware : Do no forget to include in the loop the number of observations (N).
+
+```{r}
+data_jags <- list(Nchild = length(data_weight$POIDNAIS),
+             sex = sex,
+             w = weight
+             )
+```
+
+## Initial values
+
+Les valeurs initiales doivent etre choisies imperativement dans les bornes fixés dans les distribution à priori.
+```{r}
+init <- list(
+  list(mean = c(2600, 2621), sd = 243),
+  list(mean = c(4890, 4800), sd = 744),
+  list(mean = c(3403, 3534), sd = 538))
+```
+
+## Implementation
+
+```{r}
+m <- jags.model(file=textConnection(model1),
+                data = data_jags,
+                inits = init,
+                n.chains = 3
+                )
+
+update(m, 3000)
+mcmc1 <- coda.samples(m, c("mean", "sd"), n.iter = 5000)
+```
+
+```{r}
+mcmc1[1]
+```
+
+```{r}
+plot(mcmc1)
+```
+
+```{r}
+summary(mcmc1)
+```
+
