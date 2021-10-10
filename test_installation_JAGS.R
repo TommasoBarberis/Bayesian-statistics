@@ -1,6 +1,7 @@
 # 1/ installer JAGS à partir du lien: http://sourceforge.net/projects/mcmc-jags/
 
 # 2/ installer le paquet rjags depuis R 
+#   (sous Windows, si le test ne fonctionne pas et que vous avez installé la version 4.11 de rjags et 4 ou sup de JAGS, c'est probablément à cause de votre version de R, desintallés R et installés une version inférieure à la v.4)
 
 # 3/ lancer le script suivant pour tester si ça fonctionne
 

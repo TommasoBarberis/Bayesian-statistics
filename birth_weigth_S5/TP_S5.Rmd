@@ -1,10 +1,13 @@
 ---
 title: "Introduction to JAGS : birth weight"
-output: html_document
+output:
+   md_document:
+   variant: markdown_github
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file = paste0(dirname(inputFile),'/README.md')) })
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE) 
 ```
 
 # 1. Context
