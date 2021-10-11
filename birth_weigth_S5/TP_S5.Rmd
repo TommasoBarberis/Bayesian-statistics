@@ -30,7 +30,8 @@ The weight of children is supposed to follow a normal distribution, with differe
 # 2. Model formalization
 
 * Set up the DAG associated to the model, specifying stochastic and deterministic links.
-(mettre schema)
+
+![DAG graph](https://github.com/TommasoBarberis/Bayesian-statistics/tree/main/birth_weigth_S5/assets/diag.png)
 
 # 3. Implementation of the model
 
