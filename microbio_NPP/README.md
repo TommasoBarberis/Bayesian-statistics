@@ -1,3 +1,8 @@
+La méthode du nombre le plus probable en microbiologie et son
+utilisation dans le cadre de la caractérisation de la contamination par
+une bactérie pathogène d’’une production alimentaire
+================
+
 # 1. Context
 
 On souhaite estimer le niveau de contamination, par une bactérie

@@ -1,8 +1,6 @@
 ---
 title: "Ecotoxicology exemple"
-output:
-   md_document:
-   variant: markdown_github
+output: github_document
 knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file = paste0(dirname(inputFile),'/README.md')) })
 ---
 
@@ -43,8 +41,8 @@ model1 <-
 }
 
 b ~ dunif(0, 10)
-logLC50 ~ dunif(-1,1)
 LC50 <- 10^logLC50
+logLC50 ~ dunif(-1,1)
 
 }
   "
@@ -89,7 +87,7 @@ m <- jags.model(file=textConnection(model1),
                 )
 
 update(m, 3000)
-mcmc1 <- coda.samples(m, c("logLC50", "b"), n.iter = 5000)
+mcmc1 <- coda.samples(m, c("LC50", "b"), n.iter = 5000)
 ```
 
 ### Minimal check of convergence
@@ -160,11 +158,30 @@ plot(mcmc1, trace = FALSE, density = TRUE)
 ```{r}
 summary(mcmc1)
 ```
+## Joint posterior probability
 
 ```{r echo=TRUE}
 mctot <- as.data.frame(as.matrix(mcmc1))
 mcsample <- mctot[sample.int(nrow(mctot), size = 500), ]
 ## Plot of the joint posterior distribution as a scatter plot
 pairs(mcsample)
+```
+
+```{r}
+b <- mctot[, "b"]
+LC50 <- mctot[, "LC50"]
+
+p <- 1/(1+(1.53/LC50)^b) # mediane et intervalle
+```
+
+## Confrontation of the model to the data - posterior predictive check
+
+
+```{r}
+summary(mcsample)
+```
+
+```{r}
+dic.samples(m, n.iter = 5000, type = "pD")
 ```
 
