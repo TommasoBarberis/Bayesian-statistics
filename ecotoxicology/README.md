@@ -277,4 +277,4 @@ a sample.
     ## Plot of the joint posterior distribution as a scatter plot
     pairs(mcsample)
 
-![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-markdown_strict/unnamed-chunk-16-1.png)
+![](./README_files/figure-markdown_strict/unnamed-chunk-16-1.png)
