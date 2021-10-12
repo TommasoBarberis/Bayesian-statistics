@@ -1,0 +1,17 @@
+desc_model <-
+  "
+  model {
+  
+
+  for (i in 1:N)
+{
+    Nalive[i] ~ dbin(p[i], n)
+    p[i] <- 1 / (1 + (conc[i]/LC50)^b)
+}
+
+b ~ dunif(0, 10)
+LC50 <- 10^logLC50
+logLC50 ~ dunif(-1,1)
+
+}
+  "
