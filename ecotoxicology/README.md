@@ -21,7 +21,7 @@ organisms are dead after 21 days, with a log-logistic modeling of the
 
     library(rjags)
 
-    ## Loading required package: coda
+    ## Le chargement a nécessité le package : coda
 
     ## Linked to JAGS 4.3.0
 
@@ -95,15 +95,15 @@ Start values need to be in the fixed interval of prior distribution:
 
     plot(mcmc1)
 
-![](C:/Users/Megaport/Bayesian-statistics/ecotoxicology_S6/README_files/figure-markdown_strict/unnamed-chunk-6-1.png)
+![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-markdown_strict/unnamed-chunk-6-1.png)
 
     require(lattice)
 
-    ## Loading required package: lattice
+    ## Le chargement a nécessité le package : lattice
 
     xyplot(mcmc1)
 
-![](C:/Users/Megaport/Bayesian-statistics/ecotoxicology_S6/README_files/figure-markdown_strict/unnamed-chunk-6-2.png)
+![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-markdown_strict/unnamed-chunk-6-2.png)
 
     summary(mcmc1)
 
@@ -116,15 +116,15 @@ Start values need to be in the fixed interval of prior distribution:
     ## 1. Empirical mean and standard deviation for each variable,
     ##    plus standard error of the mean:
     ## 
-    ##           Mean      SD  Naive SE Time-series SE
-    ## b        1.480 0.28496 0.0023267       0.003537
-    ## logLC50 -0.366 0.07981 0.0006516       0.000939
+    ##            Mean      SD  Naive SE Time-series SE
+    ## b        1.4852 0.28574 0.0023331      0.0033346
+    ## logLC50 -0.3639 0.07995 0.0006528      0.0009172
     ## 
     ## 2. Quantiles for each variable:
     ## 
     ##            2.5%     25%     50%     75%   97.5%
-    ## b        0.9567  1.2810  1.4714  1.6687  2.0694
-    ## logLC50 -0.5355 -0.4149 -0.3611 -0.3127 -0.2223
+    ## b        0.9687  1.2861  1.4734  1.6728  2.0747
+    ## logLC50 -0.5308 -0.4141 -0.3589 -0.3092 -0.2195
 
     gelman.diag(mcmc1) # return only values of 1 for convergence
 
@@ -140,17 +140,17 @@ Start values need to be in the fixed interval of prior distribution:
 
     gelman.plot(mcmc1)
 
-![](C:/Users/Megaport/Bayesian-statistics/ecotoxicology_S6/README_files/figure-markdown_strict/unnamed-chunk-8-1.png)
-### Autocorrelation plot
+![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-markdown_strict/unnamed-chunk-8-1.png)
+\#\#\# Autocorrelation plot
 
     autocorr.plot(mcmc1[[1]])
 
-![](C:/Users/Megaport/Bayesian-statistics/ecotoxicology_S6/README_files/figure-markdown_strict/unnamed-chunk-9-1.png)
+![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-markdown_strict/unnamed-chunk-9-1.png)
 
     effectiveSize(mcmc1)
 
     ##        b  logLC50 
-    ## 6499.814 7268.675
+    ## 7424.937 7627.755
 
     raftery.diag(mcmc1)
 
@@ -162,8 +162,8 @@ Start values need to be in the fixed interval of prior distribution:
     ##                                                
     ##          Burn-in  Total Lower bound  Dependence
     ##          (M)      (N)   (Nmin)       factor (I)
-    ##  b       5        5871  3746         1.57      
-    ##  logLC50 7        7397  3746         1.97      
+    ##  b       8        10824 3746         2.89      
+    ##  logLC50 6        6406  3746         1.71      
     ## 
     ## 
     ## [[2]]
@@ -174,8 +174,8 @@ Start values need to be in the fixed interval of prior distribution:
     ##                                                
     ##          Burn-in  Total Lower bound  Dependence
     ##          (M)      (N)   (Nmin)       factor (I)
-    ##  b       7        7675  3746         2.05      
-    ##  logLC50 6        6878  3746         1.84      
+    ##  b       5        6078  3746         1.62      
+    ##  logLC50 6        6756  3746         1.80      
     ## 
     ## 
     ## [[3]]
@@ -186,14 +186,14 @@ Start values need to be in the fixed interval of prior distribution:
     ##                                                
     ##          Burn-in  Total Lower bound  Dependence
     ##          (M)      (N)   (Nmin)       factor (I)
-    ##  b       5        5391  3746         1.44      
-    ##  logLC50 6        6756  3746         1.80
+    ##  b       5        5771  3746         1.54      
+    ##  logLC50 7        7397  3746         1.97
 
 ## Evolution of MCMC quantiles over iterates
 
     cumuplot(mcmc1[[1]])
 
-![](C:/Users/Megaport/Bayesian-statistics/ecotoxicology_S6/README_files/figure-markdown_strict/unnamed-chunk-10-1.png)
+![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-markdown_strict/unnamed-chunk-10-1.png)
 
 ### Simulations without observed data (Monte Carlo)
 
@@ -223,7 +223,7 @@ a sample.
     ## Plot of prior densities
     plot(mc0, trace = FALSE, density = TRUE)
 
-![](C:/Users/Megaport/Bayesian-statistics/ecotoxicology_S6/README_files/figure-markdown_strict/unnamed-chunk-12-1.png)
+![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-markdown_strict/unnamed-chunk-12-1.png)
 
     summary(mc0)
 
@@ -237,19 +237,19 @@ a sample.
     ##    plus standard error of the mean:
     ## 
     ##       Mean    SD Naive SE Time-series SE
-    ## LC50 2.192 2.469  0.04507        0.04507
-    ## b    4.963 2.855  0.05213        0.05213
+    ## LC50 2.131 2.465   0.0450         0.0450
+    ## b    4.967 2.859   0.0522         0.0522
     ## 
     ## 2. Quantiles for each variable:
     ## 
-    ##        2.5%    25%   50%   75% 97.5%
-    ## LC50 0.1139 0.3348 1.117 3.222 8.777
-    ## b    0.2303 2.5271 4.940 7.390 9.734
+    ##        2.5%    25%    50%   75% 97.5%
+    ## LC50 0.1112 0.3112 0.9873 3.145 8.672
+    ## b    0.2325 2.4843 4.9327 7.484 9.729
 
     ## Plot of posterior densities
     plot(mcmc1, trace = FALSE, density = TRUE)
 
-![](C:/Users/Megaport/Bayesian-statistics/ecotoxicology_S6/README_files/figure-markdown_strict/unnamed-chunk-14-1.png)
+![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-markdown_strict/unnamed-chunk-14-1.png)
 
     summary(mcmc1)
 
@@ -262,19 +262,19 @@ a sample.
     ## 1. Empirical mean and standard deviation for each variable,
     ##    plus standard error of the mean:
     ## 
-    ##           Mean      SD  Naive SE Time-series SE
-    ## b        1.480 0.28496 0.0023267       0.003537
-    ## logLC50 -0.366 0.07981 0.0006516       0.000939
+    ##            Mean      SD  Naive SE Time-series SE
+    ## b        1.4852 0.28574 0.0023331      0.0033346
+    ## logLC50 -0.3639 0.07995 0.0006528      0.0009172
     ## 
     ## 2. Quantiles for each variable:
     ## 
     ##            2.5%     25%     50%     75%   97.5%
-    ## b        0.9567  1.2810  1.4714  1.6687  2.0694
-    ## logLC50 -0.5355 -0.4149 -0.3611 -0.3127 -0.2223
+    ## b        0.9687  1.2861  1.4734  1.6728  2.0747
+    ## logLC50 -0.5308 -0.4141 -0.3589 -0.3092 -0.2195
 
     mctot <- as.data.frame(as.matrix(mcmc1))
     mcsample <- mctot[sample.int(nrow(mctot), size = 500), ]
     ## Plot of the joint posterior distribution as a scatter plot
     pairs(mcsample)
 
-![](C:/Users/Megaport/Bayesian-statistics/ecotoxicology_S6/README_files/figure-markdown_strict/unnamed-chunk-16-1.png)
+![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-markdown_strict/unnamed-chunk-16-1.png)
