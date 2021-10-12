@@ -1,8 +1,10 @@
 ---
 title:  "La méthode du nombre le plus probable
   en microbiologie et son utilisation dans le cadre de la caractérisation de la contamination par une bactérie pathogène d''une production alimentaire"
-output: github_document
-knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file = paste0(dirname(inputFile),'/README.md')) })
+output: 
+  md_document:
+    variant: "markdown_github"
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file = "README.md" )})
 ---
 
 ```{r setup, include=FALSE}

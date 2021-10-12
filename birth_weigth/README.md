@@ -10,10 +10,12 @@ child (hence, the value 1 correspond to a boy, and 2 to a girl).
 Hypothese: variabilité de poids est le meme chez les filles et les
 garcons.
 
-    data_weight <- read.table("pnais48.txt", h = T, sep = ",")
-    sex <- data_weight$SEX + 1
-    weight <- data_weight$POIDNAIS
-    table(sex)
+``` r
+data_weight <- read.table("pnais48.txt", h = T, sep = ",")
+sex <- data_weight$SEX + 1
+weight <- data_weight$POIDNAIS
+table(sex)
+```
 
     ## sex
     ##  1  2 
@@ -59,68 +61,74 @@ The model is implemented as a string, called modele1.
     mean used for the distribution associated to an observation and the
     sex is deterministic (simple equality, with no random part).
 
-<!-- -->
+``` r
+library(rjags)
+```
 
-    library(rjags)
-
-    ## Loading required package: coda
+    ## Le chargement a nécessité le package : coda
 
     ## Linked to JAGS 4.3.0
 
     ## Loaded modules: basemod,bugs
 
-    model1 <-
-      "
-      model {
-      
-      # Defining links
-      
-      for (i in 1:Nchild)
-    {
-        mu[i] <- mean[sex[i]]   # mean: vector of two elements, mean for boys                                and means for girls
-        w[i] ~ dnorm(mu[i], tau) # weight
-    }
+``` r
+model1 <-
+  "
+  model {
+  
+  # Defining links
+  
+  for (i in 1:Nchild)
+{
+    mu[i] <- mean[sex[i]]   # mean: vector of two elements, mean for boys                                and means for girls
+    w[i] ~ dnorm(mu[i], tau) # weight
+}
 
-      # Definition for a prior distribution  
-      mean[1] ~ dunif(2500, 5000) # prior
-      mean[2] ~ dunif(2500, 5000)
-      tau <- 1/sd # precision
-      sd ~ dunif(200, 800)
-      }
-      "
+  # Definition for a prior distribution  
+  mean[1] ~ dunif(2500, 5000) # prior
+  mean[2] ~ dunif(2500, 5000)
+  tau <- 1/sd # precision
+  sd ~ dunif(200, 800)
+  }
+  "
+```
 
-**~**: stochastic link
+**\~**: stochastic link
 
-**&lt;-**: deterministic link
+**\<-**: deterministic link
 
 ## Data
 
 -   Define the data required for this model (data). Beware : Do no
     forget to include in the loop the number of observations (N).
 
-<!-- -->
-
-    data_jags <- list(Nchild = length(data_weight$POIDNAIS),
-                 sex = sex,
-                 w = weight
-                 )
+``` r
+data_jags <- list(Nchild = length(data_weight$POIDNAIS),
+             sex = sex,
+             w = weight
+             )
+```
 
 ## Initial values
 
-Start values need to be in the fixed interval of prior distribution
+Start values need to be in the fixed interval of prior distribution:
 
-    init <- list(
-      list(mean = c(2600, 2621), sd = 243),
-      list(mean = c(4890, 4800), sd = 744),
-      list(mean = c(3403, 3534), sd = 538))
+``` r
+init <- list(
+  list(mean = c(2600, 2621), sd = 243),
+  list(mean = c(4890, 4800), sd = 744),
+  list(mean = c(3403, 3534), sd = 538))
+```
 
 ## Implementation
 
-    m <- jags.model(file=textConnection(model1),
-                    data = data_jags,
-                    inits = init,
-                    n.chains = 3
-                    )
+``` r
+m <- jags.model(file=textConnection(model1),
+                data = data_jags,
+                inits = init,
+                n.chains = 3
+                )
+```
 
     ## Compiling model graph
     ##    Resolving undeclared variables
@@ -132,14 +140,20 @@ Start values need to be in the fixed interval of prior distribution
     ## 
     ## Initializing model
 
-    update(m, 3000)
-    mcmc1 <- coda.samples(m, c("mean", "sd"), n.iter = 5000)
+``` r
+update(m, 3000)
+mcmc1 <- coda.samples(m, c("mean", "sd"), n.iter = 5000)
+```
 
-    plot(mcmc1)
+``` r
+plot(mcmc1)
+```
 
-![](C:/Users/Megaport/Bayesian-statistics/birth_weigth_S5/README_files/figure-markdown_strict/unnamed-chunk-7-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
-    summary(mcmc1)
+``` r
+summary(mcmc1)
+```
 
     ## 
     ## Iterations = 4001:9000
@@ -150,14 +164,14 @@ Start values need to be in the fixed interval of prior distribution
     ## 1. Empirical mean and standard deviation for each variable,
     ##    plus standard error of the mean:
     ## 
-    ##           Mean     SD  Naive SE Time-series SE
-    ## mean[1] 3728.2 5.2512 0.0428762       0.053951
-    ## mean[2] 3379.2 6.5343 0.0533520       0.069084
-    ## sd       799.9 0.1053 0.0008601       0.001743
+    ##           Mean     SD Naive SE Time-series SE
+    ## mean[1] 3728.1 5.2733 0.043056       0.054897
+    ## mean[2] 3379.1 6.4473 0.052642       0.065703
+    ## sd       799.9 0.1007 0.000822       0.001713
     ## 
     ## 2. Quantiles for each variable:
     ## 
     ##           2.5%    25%    50%  75% 97.5%
-    ## mean[1] 3717.9 3724.6 3728.1 3732  3738
-    ## mean[2] 3366.2 3374.8 3379.2 3384  3392
+    ## mean[1] 3717.8 3724.5 3728.1 3732  3738
+    ## mean[2] 3366.4 3374.8 3379.2 3383  3392
     ## sd       799.6  799.9  799.9  800   800

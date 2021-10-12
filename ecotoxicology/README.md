@@ -1,6 +1,3 @@
-Ecotoxicology exemple
-================
-
 # Example of Bayesian inference on a model in ecotoxicology
 
 Our aim is to study the effect of a toxic substance suspected to pollute
@@ -112,7 +109,7 @@ mcmc1 <- coda.samples(m, c("LC50", "b"), n.iter = 5000)
 plot(mcmc1)
 ```
 
-![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](README_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 ``` r
 require(lattice)
@@ -124,7 +121,7 @@ require(lattice)
 xyplot(mcmc1)
 ```
 
-![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](README_files/figure-markdown_github/unnamed-chunk-6-2.png)
 
 ``` r
 summary(mcmc1)
@@ -140,14 +137,14 @@ summary(mcmc1)
     ##    plus standard error of the mean:
     ## 
     ##        Mean      SD  Naive SE Time-series SE
-    ## LC50 0.4382 0.07878 0.0006432      0.0009022
-    ## b    1.4806 0.28452 0.0023231      0.0035046
+    ## LC50 0.4389 0.08015 0.0006544      0.0009351
+    ## b    1.4814 0.28516 0.0023283      0.0034123
     ## 
     ## 2. Quantiles for each variable:
     ## 
-    ##        2.5%    25%    50%    75% 97.5%
-    ## LC50 0.2907 0.3846 0.4361 0.4876 0.604
-    ## b    0.9600 1.2819 1.4667 1.6644 2.067
+    ##        2.5%    25%    50%    75%  97.5%
+    ## LC50 0.2908 0.3849 0.4351 0.4898 0.6055
+    ## b    0.9649 1.2832 1.4642 1.6666 2.0744
 
 ``` r
 gelman.diag(mcmc1) # return only values of 1 for convergence
@@ -156,8 +153,8 @@ gelman.diag(mcmc1) # return only values of 1 for convergence
     ## Potential scale reduction factors:
     ## 
     ##      Point est. Upper C.I.
-    ## LC50          1          1
-    ## b             1          1
+    ## LC50          1       1.01
+    ## b             1       1.01
     ## 
     ## Multivariate psrf
     ## 
@@ -167,21 +164,21 @@ gelman.diag(mcmc1) # return only values of 1 for convergence
 gelman.plot(mcmc1)
 ```
 
-![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
-\#\#\# Autocorrelation plot
+![](README_files/figure-markdown_github/unnamed-chunk-8-1.png) \#\#\#
+Autocorrelation plot
 
 ``` r
 autocorr.plot(mcmc1[[1]])
 ```
 
-![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
 ``` r
 effectiveSize(mcmc1)
 ```
 
     ##     LC50        b 
-    ## 7644.493 6595.004
+    ## 7368.832 6986.317
 
 ``` r
 raftery.diag(mcmc1)
@@ -195,8 +192,8 @@ raftery.diag(mcmc1)
     ##                                             
     ##       Burn-in  Total Lower bound  Dependence
     ##       (M)      (N)   (Nmin)       factor (I)
-    ##  LC50 7        7263  3746         1.94      
-    ##  b    8        11888 3746         3.17      
+    ##  LC50 6        6756  3746         1.80      
+    ##  b    5        5483  3746         1.46      
     ## 
     ## 
     ## [[2]]
@@ -207,8 +204,8 @@ raftery.diag(mcmc1)
     ##                                             
     ##       Burn-in  Total Lower bound  Dependence
     ##       (M)      (N)   (Nmin)       factor (I)
-    ##  LC50 6        6520  3746         1.74      
-    ##  b    5        5916  3746         1.58      
+    ##  LC50 7        7397  3746         1.97      
+    ##  b    6        6295  3746         1.68      
     ## 
     ## 
     ## [[3]]
@@ -219,8 +216,8 @@ raftery.diag(mcmc1)
     ##                                             
     ##       Burn-in  Total Lower bound  Dependence
     ##       (M)      (N)   (Nmin)       factor (I)
-    ##  LC50 7        7968  3746         2.13      
-    ##  b    7        7263  3746         1.94
+    ##  LC50 10       12182 3746         3.25      
+    ##  b    6        6406  3746         1.71
 
 ## Evolution of MCMC quantiles over iterates
 
@@ -228,7 +225,7 @@ raftery.diag(mcmc1)
 cumuplot(mcmc1[[1]])
 ```
 
-![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](README_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
 ### Simulations without observed data (Monte Carlo)
 
@@ -264,7 +261,7 @@ a sample.
 plot(mc0, trace = FALSE, density = TRUE)
 ```
 
-![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-markdown_github/unnamed-chunk-12-1.png)
 
 ``` r
 summary(mc0)
@@ -280,21 +277,21 @@ summary(mc0)
     ##    plus standard error of the mean:
     ## 
     ##       Mean    SD Naive SE Time-series SE
-    ## LC50 2.162 2.511  0.04585        0.04741
-    ## b    4.992 2.880  0.05258        0.05258
+    ## LC50 2.186 2.534  0.04627        0.04627
+    ## b    5.080 2.883  0.05263        0.05263
     ## 
     ## 2. Quantiles for each variable:
     ## 
     ##        2.5%    25%   50%   75% 97.5%
-    ## LC50 0.1109 0.3184 0.986 3.206 8.866
-    ## b    0.2279 2.4891 5.002 7.432 9.753
+    ## LC50 0.1119 0.3217 1.012 3.244 8.977
+    ## b    0.2556 2.6238 5.080 7.632 9.741
 
 ``` r
 ## Plot of posterior densities
 plot(mcmc1, trace = FALSE, density = TRUE)
 ```
 
-![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-markdown_github/unnamed-chunk-14-1.png)
 
 ``` r
 summary(mcmc1)
@@ -310,14 +307,14 @@ summary(mcmc1)
     ##    plus standard error of the mean:
     ## 
     ##        Mean      SD  Naive SE Time-series SE
-    ## LC50 0.4382 0.07878 0.0006432      0.0009022
-    ## b    1.4806 0.28452 0.0023231      0.0035046
+    ## LC50 0.4389 0.08015 0.0006544      0.0009351
+    ## b    1.4814 0.28516 0.0023283      0.0034123
     ## 
     ## 2. Quantiles for each variable:
     ## 
-    ##        2.5%    25%    50%    75% 97.5%
-    ## LC50 0.2907 0.3846 0.4361 0.4876 0.604
-    ## b    0.9600 1.2819 1.4667 1.6644 2.067
+    ##        2.5%    25%    50%    75%  97.5%
+    ## LC50 0.2908 0.3849 0.4351 0.4898 0.6055
+    ## b    0.9649 1.2832 1.4642 1.6666 2.0744
 
 ## Joint posterior probability
 
@@ -328,7 +325,7 @@ mcsample <- mctot[sample.int(nrow(mctot), size = 500), ]
 pairs(mcsample)
 ```
 
-![](/home/tommaso/M2/Semestre_3/Stat_Bay/repo_git/ecotoxicology/README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](README_files/figure-markdown_github/unnamed-chunk-16-1.png)
 
 ``` r
 b <- mctot[, "b"]
@@ -344,17 +341,17 @@ summary(mcsample)
 ```
 
     ##       LC50              b         
-    ##  Min.   :0.2258   Min.   :0.7048  
-    ##  1st Qu.:0.3875   1st Qu.:1.2964  
-    ##  Median :0.4393   Median :1.4930  
-    ##  Mean   :0.4439   Mean   :1.4770  
-    ##  3rd Qu.:0.4946   3rd Qu.:1.6486  
-    ##  Max.   :0.7400   Max.   :2.2801
+    ##  Min.   :0.1740   Min.   :0.6925  
+    ##  1st Qu.:0.3857   1st Qu.:1.3047  
+    ##  Median :0.4400   Median :1.4802  
+    ##  Mean   :0.4438   Mean   :1.4809  
+    ##  3rd Qu.:0.5000   3rd Qu.:1.6583  
+    ##  Max.   :0.7416   Max.   :2.5227
 
 ``` r
 dic.samples(m, n.iter = 5000, type = "pD")
 ```
 
-    ## Mean deviance:  20.39 
-    ## penalty 2.037 
-    ## Penalized deviance: 22.43
+    ## Mean deviance:  20.4 
+    ## penalty 2.067 
+    ## Penalized deviance: 22.47
