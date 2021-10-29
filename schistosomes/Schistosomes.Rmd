@@ -8,10 +8,10 @@ knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = e
 ---
 
 # Schistosomes
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
 
 ```{r}
 data_eggs <- read.table("schisto.txt", header = T, sep = ",")
@@ -26,14 +26,12 @@ summary(data_eggs$y)
 sd(data_eggs$y)
 ```
 
-# Implementation
-
-## DAG modèle de Poisson
+# Modèle de Poisson
 
 ![dag](./assets/dag_schisto_1.png)
 
-- $y_i \sim Poisson(\theta)$
-- $\theta \sim Gamma(\alpha, \lambda)$
+-   $y_i \sim Poisson(\theta)$
+-   $\theta \sim Gamma(\alpha, \lambda)$
 
 ## Formalisation
 
@@ -103,7 +101,6 @@ xyplot(mcmc1)
 
 ```
 
-
 ```{r}
 summary(mcmc1)
 ```
@@ -112,7 +109,6 @@ summary(mcmc1)
 gelman.diag(mcmc1) # return only values of 1 for adequate convergence 
 gelman.plot(mcmc1)
 ```
-
 
 ```{r}
 cumuplot(mcmc1)
@@ -132,7 +128,7 @@ raftery.diag(mcmc1)
 # if the dependance factor is grater than 5, it means that a strong autocorrelation is present in the chains
 ```
 
-### Comparaison between _prior_ and _posterior_ laws
+### Comparaison between *prior* and *posterior* laws
 
 #### Simulations without observed data (Monte Carlo)
 
@@ -157,11 +153,12 @@ hist(mctot$theta, main = "", xlab = names(mcmctot0), freq = FALSE)
 lines(density(mcmctot0$theta), col = "blue", lwd = 2)
 # }
 ```
+
 ```{r}
 summary(mcmc0)
 ```
 
-Rien que en regardant l'intervalle de credibilite a priori [3.13; 9.77] sur le _mcmc0_ (sans les données) on remarque que il est beaucoup plus large que l'intervalle à posteriori [2.72; 2.94]. Cela veut dire qu'on a effectivement gagné de l'information.
+Rien que en regardant l'intervalle de credibilite a priori [3.13; 9.77] sur le *mcmc0* (sans les données) on remarque que il est beaucoup plus large que l'intervalle à posteriori [2.72; 2.94]. Cela veut dire qu'on a effectivement gagné de l'information.
 
 ## Posterior check
 
@@ -175,10 +172,21 @@ summary(sd_sim)
 mean(sd_sim)
 sd
 ```
-Depuis cet histogramme on voit clairement que le modèle n'arrive pas à bien estimer la sur-dispersion des données. 
+
+Depuis cet histogramme on voit clairement que le modèle n'arrive pas à bien estimer la sur-dispersion des données.
 
 ```{r}
 # freq <- (table(factor(nb_oeufs, levels = 0:60)))
 ```
 
+# Modèle binomial négatif
 
+L'espérance de ce modèle pour une observation $i$ est $ν_i \times \theta$, où $ν_i$ est un paramètre positif estimé par le modèle qui autorise l'observation $i$
+à s'écarter plus ou moins de l'espérance générale $\theta$. Il est considéré que les valeurs de $ν_i$ sur l'ensemble des observations
+suivent une loi `Gamma` de paramètres $shape = 1/α$ et $rate = 1/α$. Le modèle est donc défini par:
+
+<center>\$y_i \\sim Poisson(v_i \\times \\theta)\$ \\hspace{2cm} \$v_i \\sim Gamma(1/\\alpha, 1/\\alpha)\$</center>\
+
+La loi `Gamma` de paramètres $shape = 1/α$ et $rate = 1/α$ a une espérance de 1 et une variance de $α$. Ainsi, sur l'ensemble des patients, les nombres d'œufs varieront bien autour de $θ$, et l'ampleur de la dispersion autour de $θ$ sera fonction de la valeur de $α$.
+
+Il sera supposé que $α$ suit *a priori* une loi `uniforme` comprise entre 0 et 10. L'*a priori* du premier modèle sera conservé pour le paramètre $\theta$.
