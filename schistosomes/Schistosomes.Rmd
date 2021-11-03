@@ -164,7 +164,15 @@ Rien que en regardant l'intervalle de credibilite a priori [3.13; 9.77] sur le *
 
 ```{r}
 theta <- mctot$theta
-sd_sim <- sqrt(theta)
+
+for (i in 1:length(theta))  {
+  y_sim <- rpois(916, theta[i])
+  sd_sim[i] <- sd(y_sim) 
+}
+
+```
+
+```{r}
 sd <- sd(data_eggs$y)
 hist(sd_sim, xlim = c(1,6))
 abline(v =sd, col = "red")
@@ -176,17 +184,171 @@ sd
 Depuis cet histogramme on voit clairement que le modèle n'arrive pas à bien estimer la sur-dispersion des données.
 
 ```{r}
-# freq <- (table(factor(nb_oeufs, levels = 0:60)))
+
+tab_count <- table(factor(data_eggs$y, level=0:60))
+plot(0:60, tab_count)
+
+
 ```
 
 # Modèle binomial négatif
 
-L'espérance de ce modèle pour une observation $i$ est $ν_i \times \theta$, où $ν_i$ est un paramètre positif estimé par le modèle qui autorise l'observation $i$
-à s'écarter plus ou moins de l'espérance générale $\theta$. Il est considéré que les valeurs de $ν_i$ sur l'ensemble des observations
-suivent une loi `Gamma` de paramètres $shape = 1/α$ et $rate = 1/α$. Le modèle est donc défini par:
+L'espérance de ce modèle pour une observation $i$ est $ν_i \times \theta$, où $ν_i$ est un paramètre positif estimé par le modèle qui autorise l'observation $i$ à s'écarter plus ou moins de l'espérance générale $\theta$. Il est considéré que les valeurs de $ν_i$ sur l'ensemble des observations suivent une loi `Gamma` de paramètres $shape = 1/α$ et $rate = 1/α$. Le modèle est donc défini par:
 
-<center>\$y_i \\sim Poisson(v_i \\times \\theta)\$ \\hspace{2cm} \$v_i \\sim Gamma(1/\\alpha, 1/\\alpha)\$</center>\
+$y_i \sim Poisson(v_i \times \theta)$
+
+$v_i \sim Gamma(1/\alpha, 1/\alpha)$
 
 La loi `Gamma` de paramètres $shape = 1/α$ et $rate = 1/α$ a une espérance de 1 et une variance de $α$. Ainsi, sur l'ensemble des patients, les nombres d'œufs varieront bien autour de $θ$, et l'ampleur de la dispersion autour de $θ$ sera fonction de la valeur de $α$.
 
 Il sera supposé que $α$ suit *a priori* une loi `uniforme` comprise entre 0 et 10. L'*a priori* du premier modèle sera conservé pour le paramètre $\theta$.
+
+$\alpha \sim Unif(0,10)$
+
+$\theta \sim Gamma(\alpha, \lambda)$
+
+## Formalisation
+
+![](assets/dag_schisto_2.png)
+
+```{r}
+desc_binNeg <-
+  "
+  model {
+  
+  for (i in 1:N) {
+    y[i] ~ dpois(v[i] * theta)  
+    v[i] ~ dgamma(1/alpha_v, 1/alpha_v)
+  }
+  theta ~ dgamma(alpha, lambda)
+  alpha_v ~ dunif(min, max)
+}
+"
+```
+
+## MCMC Simulation
+
+### Data
+
+```{r}
+data_jags_bin <- list(
+  y = data_eggs$y,
+  N = length(data_eggs$y),
+  alpha = 12,
+  lambda = 2,
+  min = 0,
+  max = 10
+)
+```
+
+### Initial values
+
+Start values need to be in the fixed interval of prior distribution:
+
+```{r}
+init_bin <- list(
+  list(theta = 3, alpha_v = 0.1),
+  list(theta = 6, alpha_v = 5),
+  list(theta = 9, alpha_v = 9.9))
+```
+
+### Simulations of Markov chains
+
+```{r}
+model <- jags.model(file=textConnection(desc_binNeg),
+                data = data_jags_bin,
+                inits = init_bin,
+                n.chains = 3
+                )
+
+update(model, 3000) # burn-in phase
+mcmc1_bin <- coda.samples(model, c("theta", "alpha_v"), n.iter = 5000)
+```
+
+### Minimal check of convergence
+
+```{r include=FALSE}
+mcmc1_bin[1]
+```
+
+```{r}
+plot(mcmc1_bin$theta)
+
+require(lattice)
+xyplot(mcmc1_bin$theta)
+```
+
+```{r}
+summary(mcmc1_bin)
+```
+
+```{r}
+gelman.diag(mcmc1_bin) # return only values of 1 for adequate convergence 
+gelman.plot(mcmc1_bin)
+```
+
+```{r}
+cumuplot(mcmc1_bin)
+```
+
+### Autocorrelation plot
+
+```{r}
+acfplot(mcmc1_bin)
+autocorr.plot(mcmc1_bin)
+
+effectiveSize(mcmc1_bin) # estimation of effective size in function of autocorrelation for the 3 chains (3 x 5000 = 15000 iterations)
+
+# if we want reduce as possible autocorrelation, we can set the parameter thin = 15000/7000 (7000 => effective size)
+
+raftery.diag(mcmc1_bin)
+# if the dependance factor is grater than 5, it means that a strong autocorrelation is present in the chains
+```
+
+### Comparaison between *prior* and *posterior* laws
+
+#### Simulations without observed data (Monte Carlo)
+
+```{r}
+d0_bin <- list(
+  N = length(data_eggs$y),
+  alpha = 12,
+  lambda = 2,
+  min = 0,
+  max = 10
+)
+model0_bin <- jags.model(file = textConnection(desc_binNeg), data = d0_bin, n.chains = 1)
+
+update(model0, 5000)
+mcmc0_bin <- coda.samples(model0_bin, c("theta", "alpha_v"), n.iter = 5000)
+mcmctot0_bin <- as.data.frame(as.matrix(mcmc0_bin))
+mctot_bin <- as.data.frame(as.matrix(mcmc1_bin))
+
+
+hist(mctot_bin$theta, main = "", xlab = "theta", freq = FALSE)
+lines(density(mcmctot0_bin$theta), col = "blue", lwd = 2)
+
+hist(mctot_bin$alpha_v, main = "", xlab = "alpha", freq = FALSE)
+lines(density(mcmctot0_bin$alpha_v), col = "blue", lwd = 2)
+```
+
+```{r}
+summary(mcmc0_bin)
+```
+
+## Posterior check
+
+```{r}
+theta_bin <- mctot_bin$theta
+for (i in 1:length(theta)) {
+  theta_bin[i]
+}
+```
+
+```{r}
+# hist(sd_sim, xlim = c(1,6))
+# abline(v =sd, col = "red")
+# summary(sd_sim)
+# mean(sd_sim)
+# sd
+```
