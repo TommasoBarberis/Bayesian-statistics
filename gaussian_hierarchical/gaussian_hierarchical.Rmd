@@ -138,13 +138,12 @@ summary(mcmc_gauss2)
 ```{r}
 desc_model_gauss3 <- "model
   { for (i in 1:nindiv) {
-    size[i] ~ dnorm(mu_i, tau_intra)
-    # pas oblige de mettre le noeud intermediaire mu_i
-    mu_i <- mean()
+    size[i] ~ dnorm(mu[numcountry[i]], tau_intra)
+    # mu_ind[i] <- mu[numcountry[i]]
   }
   
   for (j in 1:Ncountry) {
-    mu[numcountry] ~ dnorm(M, tau_inter)
+    mu[j] ~ dnorm(M, tau_inter)
   }
   
   M ~ dunif(100, 250)
@@ -167,28 +166,132 @@ ncountries <- length(countries)
 size <- data$size
 numcountry <- match(data$country, countries)
 nindiv <- nrow(data)
-
-# Data passed to JAGS
-epsilon <- 0.001
-data_gauss3 <- list(
-  size=size, 
-  numcountry=numcountry,
-  Ncountry=ncountries, 
-  nindiv=nindiv, 
-  eps=epsilon)
 ```
 
 ```{r}
-init_gauss3 <- list(
-  list(mu_j=150),
-  list(mu_j=110),
-  list(mu_j=190))
+# Data passed to JAGS
+epsilon <- 0.001
+data_gauss3 <- list(
+  size=size,
+  numcountry=numcountry,
+  Ncountry=ncountries,
+  nindiv=nrow(data),
+  eps=epsilon)
+
+init_gauss3 <- list(list(M=150, tau_inter=1, tau_intra= 1), list(M=110, tau_inter=0.4, tau_intra= 0.4), list(M=190, tau_inter=0.2, tau_intra= 0.2))
+
 
 model_gauss3 <- jags.model(
   file=textConnection(desc_model_gauss3),
-  data=data_gauss3, 
-  inits=init_gauss3, 
+  data=data_gauss3,
+  inits=init_gauss3,
   n.chains=3)
+
 update(model_gauss3,3000)
-mcmc_gauss2 <- coda.samples(model_gauss3, "M", "S_inter", "Sintra", n.iter=50000, thin=10)
+
+mcmc_gauss3 <- coda.samples(model_gauss3, "M", "S_inter", "S_intra", n.iter=50000, thin=10)
 ```
+
+```{r}
+#Modele_3
+model_3 <- "model{ 
+  for (j in 1:ncountries) {
+    mu[j] ~ dnorm(M, Tinter)
+  }
+  for (i in 1:nindiv) {
+    size[i] ~ dnorm(mu[numcountry[i]], Tintra)
+  }
+  Tinter ~ dgamma(epsilon,epsilon)
+  Tintra ~ dgamma(epsilon,epsilon)
+  sigma_inter <- 1/sqrt(Tinter)
+  sigma_intra <- 1/sqrt(Tintra)
+  M ~ dunif(100, 250)
+}"
+
+# Vector of (unique) country names and length of this vector
+countries <- unique(data$country)
+ncountries <- length(countries)
+# Vector of individual measures and countries for these individuals,
+# length of these vectors (number of individuals)
+size <- data$size
+numcountry <- match(data$country, countries)
+nindiv <- nrow(data)
+# Data passed to JAGS
+epsilon1 <- 0.001
+epsilon2 <- 0.01
+epsilon3 <- 0.1
+data4jags_3 <- list(size=size, numcountry=numcountry,
+                  ncountries=ncountries, nindiv=nindiv, epsilon=epsilon2)
+init <- list(list(M=150, Tinter=1, Tintra= 1), list(M=110, Tinter=0.4, Tintra= 0.4), list(M=190, Tinter=0.2, Tintra= 0.2))
+modeljags_3 <- jags.model(file=textConnection(model_3),
+                          data=data4jags_3, inits=init, n.chains=3)
+update(modeljags_3,3000)
+mcmc_3 <- coda.samples(modeljags_3, c("M", "mu", "sigma_inter", "sigma_intra"), n.iter=50000, thin=10)
+summary(mcmc_3)
+
+# Quand on augmente de 100 le epsilon, la median de sigma_inter augmente
+
+```
+
+### Uniform prior
+
+```{r}
+desc_model_unif_10 <- "model{ 
+  for (j in 1:ncountries) {
+    mu[j] ~ dnorm(M, Tinter)
+  }
+  for (i in 1:nindiv) {
+    size[i] ~ dnorm(mu[numcountry[i]], Tintra)
+  }
+  Tinter ~ dunif(0, 10)
+  Tintra ~ dunif(0, 10)
+  sigma_inter <- 1/sqrt(Tinter)
+  sigma_intra <- 1/sqrt(Tintra)
+  M ~ dunif(100, 250)
+}"
+```
+
+```{r}
+data_jags_unif_10 <- list(size=size, numcountry=numcountry,
+                  ncountries=ncountries, nindiv=nindiv)
+init_unif_10 <- list(list(M=150, Tinter=1, Tintra= 1), list(M=110, Tinter=5, Tintra= 5), list(M=190, Tinter=9, Tintra=9))
+model_unif_10 <- jags.model(file=textConnection(desc_model_unif_10),
+                          data=data_jags_unif_10, inits=init_unif_10, n.chains=3)
+update(model_unif_10,3000)
+mcmc_unif_10 <- coda.samples(model_unif_10, c("M", "sigma_inter", "sigma_intra"), n.iter=50000, thin=10)
+summary(mcmc_unif_10)
+```
+
+### Cauchy prior
+
+```{r}
+desc_model_cauchy <- "model{ 
+  for (j in 1:ncountries) {
+    mu[j] ~ dnorm(M, Tinter)
+  }
+  for (i in 1:nindiv) {
+    size[i] ~ dnorm(mu[numcountry[i]], Tintra)
+  }
+  Tinter ~ dt(0, 1/scale^2, 1)T(0,)
+  Tintra ~ dt(0, 1/scale^2, 1)T(0,)
+
+  sigma_inter <- 1/sqrt(Tinter)
+  sigma_intra <- 1/sqrt(Tintra)
+  M ~ dunif(100, 250)
+}"
+```
+
+```{r}
+data_jags_cauchy <- list(size=size, numcountry=numcountry,
+                  ncountries=ncountries, nindiv=nindiv, scale=5)
+init_cauchy <- list(list(M=150, Tinter=1, Tintra= 1), list(M=110, Tinter=5, Tintra= 5), list(M=190, Tinter=9, Tintra=9))
+model_cauchy <- jags.model(file=textConnection(desc_model_cauchy),
+                          data=data_jags_cauchy, inits=init_cauchy, n.chains=3)
+update(model_cauchy,3000)
+mcmc_cauchy <- coda.samples(model_cauchy, c("M", "mu", "sigma_inter", "sigma_intra"), n.iter=50000, thin=10)
+summary(mcmc_cauchy)
+```
+
+Dans le modele hierarchique on considere que les differentes unités (ici les pays) ne sont pas independants, la moyenne observée sur une unité depend aussi des moyennes des autres.\
+Cela ca peut se reveler utilie lorsque on cherche a estimer la moyenne d'un pays pour lequel on a tres peu de données et ainsi on utilise les données des autres pays pour modeliser celui-ci.\
+On dit alors qu'on "*shrink*" vers la moyenne generale des differents pays.
