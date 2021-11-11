@@ -1,8 +1,7 @@
 ---
 title: "Introduction to JAGS : birth weight"
-output: 
-  md_document:
-    variant: "markdown_github"
+output: md_document
+    # variant: "markdown_github"
 # knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file = "README.md" )})
 ---
 

@@ -10,12 +10,10 @@ child (hence, the value 1 correspond to a boy, and 2 to a girl).
 Hypothese: variabilité de poids est le meme chez les filles et les
 garcons.
 
-``` r
-data_weight <- read.table("pnais48.txt", h = T, sep = ",")
-sex <- data_weight$SEX + 1
-weight <- data_weight$POIDNAIS
-table(sex)
-```
+    data_weight <- read.table("pnais48.txt", h = T, sep = ",")
+    sex <- data_weight$SEX + 1
+    weight <- data_weight$POIDNAIS
+    table(sex)
 
     ## sex
     ##  1  2 
@@ -61,9 +59,9 @@ The model is implemented as a string, called `desc_model1`.
     mean used for the distribution associated to an observation and the
     sex is deterministic (simple equality, with no random part).
 
-``` r
-library(rjags)
-```
+<!-- -->
+
+    library(rjags)
 
     ## Le chargement a nécessité le package : coda
 
@@ -71,64 +69,58 @@ library(rjags)
 
     ## Loaded modules: basemod,bugs
 
-``` r
-desc_model1 <-
-  "
-  model {
-  
-  # Defining links
-  
-  for (i in 1:Nchild)
-{
-    mu[i] <- mean[sex[i]]   # mean: vector of two elements, mean for boys                                and means for girls
-    w[i] ~ dnorm(mu[i], tau) # weight
-}
+    desc_model1 <-
+      "
+      model {
+      
+      # Defining links
+      
+      for (i in 1:Nchild)
+    {
+        mu[i] <- mean[sex[i]]   # mean: vector of two elements, mean for boys                                and means for girls
+        w[i] ~ dnorm(mu[i], tau) # weight
+    }
 
-  # Definition for a prior distribution  
-  mean[1] ~ dunif(2500, 5000) 
-  mean[2] ~ dunif(2500, 5000)
-  tau <- 1/sd # precision
-  sd ~ dunif(200, 800)
-  }
-  "
-```
+      # Definition for a prior distribution  
+      mean[1] ~ dunif(2500, 5000) 
+      mean[2] ~ dunif(2500, 5000)
+      tau <- 1/sd # precision
+      sd ~ dunif(200, 800)
+      }
+      "
 
-**\~**: stochastic link
+**~**: stochastic link
 
-**\<-**: deterministic link
+**&lt;-**: deterministic link
 
 ## Data
 
 -   Define the data required for this model (data). Beware : Do no
     forget to include in the loop the number of observations (N).
 
-``` r
-data_birth_w <- list(Nchild = length(data_weight$POIDNAIS),
-             sex = sex,
-             w = weight
-             )
-```
+<!-- -->
+
+    data_birth_w <- list(Nchild = length(data_weight$POIDNAIS),
+                 sex = sex,
+                 w = weight
+                 )
 
 ## Initial values
 
 Start values need to be in the fixed interval of prior distribution:
 
-``` r
-init_birth_w <- list(
-  list(mean = c(2600, 4000), sd = 500),
-  list(mean = c(4500, 2700), sd = 700),
-  list(mean = c(4000, 4000), sd = 300))
-```
+    init_birth_w <- list(
+      list(mean = c(2600, 4000), sd = 500),
+      list(mean = c(4500, 2700), sd = 700),
+      list(mean = c(4000, 4000), sd = 300))
 
 ## Implementation
 
-``` r
-model_birth_w <- jags.model(file=textConnection(desc_model1),
-                data = data_birth_w,
-                inits = init_birth_w,
-                n.chains = 3
-                )
-```
+    model_birth_w <- jags.model(file=textConnection(desc_model1),
+                    data = data_birth_w,
+                    inits = init_birth_w,
+                    n.chains = 3
+                    )
 
     ## Compiling model graph
     ##    Resolving undeclared variables
@@ -140,16 +132,12 @@ model_birth_w <- jags.model(file=textConnection(desc_model1),
     ## 
     ## Initializing model
 
-``` r
-update(model_birth_w, 3000)
-mcmc_birth_w <- coda.samples(model_birth_w, c("mean", "sd"), n.iter = 5000)
-```
+    update(model_birth_w, 3000)
+    mcmc_birth_w <- coda.samples(model_birth_w, c("mean", "sd"), n.iter = 5000)
 
 The table of chain `i` is obtained with the following command:
 
-``` r
-# mcmc_birth_w[[1]]
-```
+    # mcmc_birth_w[[1]]
 
 Each table contains the parameter as columns, with the iterations of the
 ***MCMC*** as lines.
@@ -157,11 +145,9 @@ Each table contains the parameter as columns, with the iterations of the
 Computation of the posterior mean of the average birth weight of boys
 from the first ***MCMC***:
 
-``` r
-mean(mcmc_birth_w[[1]][, "mean[1]"])
-```
+    mean(mcmc_birth_w[[1]][, "mean[1]"])
 
-    ## [1] 3728.182
+    ## [1] 3727.862
 
 ⇒ On this example, it is not possible to get an explicit description of
 the posterior distributions of the parameters. Yet, if *σ* is known,
@@ -185,20 +171,16 @@ distributions of the parameters are explicitly given.
 
 ⇒ Check visually the convergence form the track of the 3 runs of MCMC:
 
-``` r
-plot(mcmc_birth_w)
-```
+    plot(mcmc_birth_w)
 
-![](TP_S5_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![](birth_weigth_files/figure-markdown_strict/unnamed-chunk-8-1.png)
 
 Whatever the initial values of the parameters, the three chains seem to
 sample in similar ranges. The chains overlap, and mix well. This is a
 sign of convergence of the algorithm (convergence towards a
 distribution, and not a value).
 
-``` r
-gelman.diag(mcmc_birth_w)
-```
+    gelman.diag(mcmc_birth_w)
 
     ## Potential scale reduction factors:
     ## 
@@ -211,11 +193,9 @@ gelman.diag(mcmc_birth_w)
     ## 
     ## 1
 
-``` r
-gelman.plot(mcmc_birth_w)
-```
+    gelman.plot(mcmc_birth_w)
 
-![](TP_S5_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](birth_weigth_files/figure-markdown_strict/unnamed-chunk-10-1.png)
 
 The variance reduction index is 1 for the 3 parameters on all the 5000
 kept iterations. This index is defined as:
