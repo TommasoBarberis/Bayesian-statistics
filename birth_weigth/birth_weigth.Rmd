@@ -1,7 +1,8 @@
 ---
 title: "Introduction to JAGS : birth weight"
-output: md_document
-    # variant: "markdown_github"
+output: 
+  md_document:
+    variant: "markdown_github"
 # knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file = "README.md" )})
 ---
 
@@ -146,10 +147,8 @@ gelman.plot(mcmc_birth_w)
 
 The variance reduction index is 1 for the 3 parameters on all the 5000 kept iterations. This index is defined as:
 
-<center>
+<center>test</center>
 
-$\sqrt{\frac{var(total)}{var(wthin-chains)}}$
-
-</center>
+<center>\$\\sqrt{\\frac{var(total)}{var(wthin-chains)}}\$</center>
 
 It means that
