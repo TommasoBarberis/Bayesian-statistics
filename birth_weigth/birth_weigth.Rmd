@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 We wish to compare the birth weight between boys and girls. To do this, we know the birth weight for a set of 48 children (file pnais48.txt). Column POIDNAIS represents birth weight, and column SEXE represents sex (0 : boy, 1 : girl). Variables are renamed as weight and sex. Moreover, for ease of use, the sex variable is re-encoded by adding 1 at each child (hence, the value 1 correspond to a boy, and 2 to a girl).
 
-Hypothese: variabilité de poids est le meme chez les filles et les garcons.
+Hypothesysis: variability of the wight is the same between boys and girls.
 
 ```{r}
 data_weight <- read.table("pnais48.txt", h = T, sep = ",")
@@ -90,8 +90,8 @@ Start values need to be in the fixed interval of prior distribution:
 ```{r}
 init_birth_w <- list(
   list(mean = c(2600, 4000), sd = 500),
-  list(mean = c(4500, 2700), sd = 700),
-  list(mean = c(4000, 4000), sd = 300))
+  list(mean = c(4500, 2700), sd = 750),
+  list(mean = c(4000, 4000), sd = 250))
 ```
 
 ## Implementation
@@ -129,6 +129,8 @@ This process is a **Gibbs sampling**, which is a specialized case of the Metropo
 
 # 4. Analysis of convergence and autocorrelation
 
+## Convergence
+
 $\Rightarrow$ Check visually the convergence form the track of the 3 runs of MCMC:
 
 ```{r}
@@ -147,8 +149,130 @@ gelman.plot(mcmc_birth_w)
 
 The variance reduction index is 1 for the 3 parameters on all the 5000 kept iterations. This index is defined as:
 
-<center>test</center>
+$\sqrt{\frac{var(total)}{var(wthin-chains)}}$
 
-<center>\$\\sqrt{\\frac{var(total)}{var(wthin-chains)}}\$</center>
+It means that between-chains variance is negligible in front of within-chains variance, and so the three chains sample values from the same posterior distribution).\
+The index of variance reduction has been close to 1 since the first iterations that have been kept. 3000 iterations burn-in time are enough here to reach convergence.
 
-It means that
+## Autocorrelation
+
+$\Rightarrow$ Check the autocorrelation of values inside the chains:
+
+```{r}
+autocorr.plot(mcmc_birth_w)
+```
+
+Autocorrelation is weak or the three parameters. The autocorrelation is computed for each parameter and each chain.
+
+```{r}
+lapply(mcmc_birth_w, effectiveSize)
+```
+
+The efficiency size of the chains following the chains and parameter is between 2000 and 3000, not too different from the number of iterations per chain (5000).
+
+```{r}
+raftery.diag(mcmc_birth_w)
+```
+
+Raftery's diagnostic signals dependency factors close to 1, with a total N close to the 5000 realized iterations. We can conclude that is not necessary to perform more iterations.
+
+## Number of sampled values
+
+$\Rightarrow$ Check that are enough sampled values to predict correct posterior distributions of the parameters (`cumuplot`):
+
+```{r}
+cumuplot(mcmc_birth_w)
+```
+
+The estimates of means and quantiles at 2.5% and 97.5% seem stable after 2000 iterations for the 3 parameters. It means that are enough sampled values to describe the posterior distribution (perhaps a few more would be relevant for parameter $\sigma$). With this graph we cans also evaluate convergence.
+
+# 5. Exploit the results
+
+$\Rightarrow$ Represent joint posterior distribution of the parameters (function `pairs`).\
+It is useful to concatenate the three chains to evaluate the *a posteriori* distribution (`as.data.frame.(as.matrix(.))`).
+
+```{r}
+mcmc_birth_w_tot <- as.data.frame(as.matrix(mcmc_birth_w))
+pairs(mcmc_birth_w_tot)
+```
+
+Sampled values are a sample of the joint posterior distribution of the parameters. So, the covariance between the samples values of the parameters is an estimate of the real covariance between parameters. On this example, the correlation between the sampled values seems very weak, which shows absence of correlation between the parameters.
+
+$\Rightarrow$ Compute a point estimate and a 95% - credibility interval of $\mu_b$ and $\mu_g$.
+
+```{r}
+summary(mcmc_birth_w)
+```
+
+Posterior mean and median are very close because the posterior distributions are symmetric. 95% - credibility intervals can be obtained from the 2.5% and 97.5% quantiles of the sampled values.
+
+Girls: 3728.2 [3718.0, 3739]\
+Boys: 3379.2 [3366.6, 3392]
+
+$\Rightarrow$ Find out the above results "by hand", without using the function `summary` applied to MCMC. We have to compute the statistic on the sampled values on the three chains together.
+
+```{r}
+summary(mcmc_birth_w_tot)
+```
+
+```{r}
+quantile(mcmc_birth_w_tot[, "mean[2]"], prob = c(0.025, 0.975))
+```
+
+```{r}
+quantile(mcmc_birth_w_tot[, "mean[1]"], prob = c(0.025, 0.975))
+```
+
+```{r}
+quantile(mcmc_birth_w_tot[, "sd"], prob = c(0.025, 0.975))
+```
+
+```{r}
+apply(mcmc_birth_w_tot, 2, quantile, prob = c(0.025, 0.975))
+```
+
+$\Rightarrow$ Compute the probability that the mean weight of boys is larger than the mean weight of girls.
+
+An estimate of this probability can be calculated as the proportion, among the couples of parameters sampled in the posterior distribution, of the couples wheres the boys' mean weight is larger than the girls' mean weight.\
+Graphically, it can be seen as the proportion of iterations for wichh the couple ($\mu_b$, $\mu_g$) is over the diagonal.
+
+```{r}
+sum(mcmc_birth_w_tot[, "mean[1]"] > mcmc_birth_w_tot[, "mean[2]"])/nrow(mcmc_birth_w_tot)
+```
+
+The probability that the boys' mean weight is larger than the girls' mean weight is very high.
+
+# 6. Evolution of the model
+
+Children weight is positive. This constraint is not in the model, since a normal distribution also cover negative values. A solutions is to truncate the distribution of weights at 0. In **JAGS**, the truncature operator is `T(a, b) : a` is the low troncature, `b`, the high truncature (leaving it empty if we do not want truncature on a side).
+
+$\Rightarrow$ Build a new model with this constraint, and compare the results with those of the first model.
+
+```{r}
+desc_model_birth_w2 <- 
+"model {
+  for (i in 1:Nchild) {
+    w[i] ~ dnorm(mu[i], tau)T(0, )
+    mu[i] <- mean[sex[i]]
+  }
+  mean[1] ~ dunif(2500, 5000)
+  mean[2] ~ dunif(2500, 5000)
+  tau <- 1/(sd^2)
+  sd ~ dunif(200, 800)
+}"
+```
+
+```{r}
+model_birth_w2 <- jags.model(textConnection(desc_model_birth_w2), 
+                             data = data_birth_w, 
+                             inits = init_birth_w, 
+                             n.chains = 3)
+update(model_birth_w2, 3000)
+mcmc_birth_w2 <- coda.samples(model_birth_w2, variable.names = c("mean[1]", "mean[2]", "sd"), n.iter = 5000)
+```
+
+```{r}
+summary(mcmc_birth_w2)
+```
+
+The results do not change. Indeed, considering the standard deviation of the first model, the probability to get negative weight is quasi-null. Likewise, we could have constrained the prior distribution on $\mu_b$ and $\mu_g$ to be positive, but it would not have any impact on the results in this example, since the *a posteriori* distributions are totally negatives values.
