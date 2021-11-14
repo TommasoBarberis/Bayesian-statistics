@@ -170,26 +170,26 @@ nindiv <- nrow(data)
 
 ```{r}
 # Data passed to JAGS
-epsilon <- 0.001
-data_gauss3 <- list(
-  size=size,
-  numcountry=numcountry,
-  Ncountry=ncountries,
-  nindiv=nrow(data),
-  eps=epsilon)
+# epsilon <- 0.001
+# data_gauss3 <- list(
+  # size=size,
+  # numcountry=numcountry,
+  # Ncountry=ncountries,
+  # nindiv=nrow(data),
+  # eps=epsilon)
 
-init_gauss3 <- list(list(M=150, tau_inter=1, tau_intra= 1), list(M=110, tau_inter=0.4, tau_intra= 0.4), list(M=190, tau_inter=0.2, tau_intra= 0.2))
+# init_gauss3 <- list(list(M=150, tau_inter=1, tau_intra= 1), list(M=110, tau_inter=0.4, tau_intra= 0.4), list(M=190, tau_inter=0.2, tau_intra= 0.2))
 
 
-model_gauss3 <- jags.model(
-  file=textConnection(desc_model_gauss3),
-  data=data_gauss3,
-  inits=init_gauss3,
-  n.chains=3)
+# model_gauss3 <- jags.model(
+#   file=textConnection(desc_model_gauss3),
+#   data=data_gauss3,
+#   inits=init_gauss3,
+#   n.chains=3)
+# 
+# update(model_gauss3,3000)
 
-update(model_gauss3,3000)
-
-mcmc_gauss3 <- coda.samples(model_gauss3, "M", "S_inter", "S_intra", n.iter=50000, thin=10)
+# mcmc_gauss3 <- coda.samples(model_gauss3, "M", "S_inter", "S_intra", n.iter=50000, thin=10)
 ```
 
 ```{r}

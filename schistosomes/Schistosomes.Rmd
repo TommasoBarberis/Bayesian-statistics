@@ -160,7 +160,11 @@ summary(mcmc0)
 
 Rien que en regardant l'intervalle de credibilite a priori [3.13; 9.77] sur le *mcmc0* (sans les données) on remarque que il est beaucoup plus large que l'intervalle à posteriori [2.72; 2.94]. Cela veut dire qu'on a effectivement gagné de l'information.
 
-## Posterior check
+## Posterior predictive check
+
+Le *posterior predictive check* est le fait de simuler des réplicats des données sous le modèle et ensuite les comparer avec les données observées. On utilise donc la prédiction à partir de l'*a posteriori* pour voir s'il y a une différence entre les données réelles et simulées.
+
+En pratique, utiliser les données qu'on a utilisé pour la modélisation aussi pour le *posterior predictive check* n'est pas la meilleure des idées, on devrait plutôt utiliser des données externes qui n'ont pas été utilisés pour l'estimation.
 
 ```{r}
 theta <- mctot$theta
